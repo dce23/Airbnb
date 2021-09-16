@@ -2,8 +2,9 @@ import { useRouter } from "next/dist/client/router";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import { format } from "date-fns";
+import InfoCard from "../components/InfoCard";
 
-function Search() {
+function Search({ searchResults }) {
   const router = useRouter();
 
   const { location, startDate, endDate, numOfGuests } = router.query;
@@ -14,7 +15,7 @@ function Search() {
 
   return (
     <div>
-      <Header />
+      <Header placeholder={`${location} | ${range} | ${numOfGuests}`} />
 
       <main className="flex">
         <section className="flex-grow pt-14 px-6">
@@ -33,6 +34,23 @@ function Search() {
             <p className="button">Instant Book</p>
             <p className="button">More filters</p>
           </div>
+
+          <div className="flex flex-col">
+            {searchResults.map(
+              ({ img, location, title, description, star, price, total }) => (
+                <InfoCard
+                  key={img}
+                  img={img}
+                  location={location}
+                  title={title}
+                  description={description}
+                  star={star}
+                  price={price}
+                  total={total}
+                />
+              )
+            )}
+          </div>
         </section>
       </main>
 
@@ -42,3 +60,15 @@ function Search() {
 }
 
 export default Search;
+
+// This gets called on every request
+export async function getServerSideProps() {
+  // Fetch data from external API
+  const searchResults = await fetch("https://links.papareact.com/isz").then(
+    (res) => res.json()
+  );
+
+  return {
+    props: { searchResults }, // will be passed to the page component as props
+  };
+}
